@@ -1,0 +1,51 @@
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# Step 1: Load Dataset and Remove Missing Values
+# Change the file path according to your dataset.
+data = pd.read_csv("/content/Salary_Data.csv").dropna()
+
+print(data.head())
+print("Columns:", data.columns.tolist())
+
+# Step 2: Select Input and Output
+# Replace column1 with a NUMERIC input/independent variable.
+# Replace column2 with a NUMERIC output/target variable.
+# Logistic Regression requires a categorical target.
+# Here, the target is created using the median:
+# 1 = value greater than median, 0 = value less than or equal to median.
+
+X = data[["column1"]]
+
+y = (data["column2"] > data["column2"].median()).astype(int)
+
+# Step 3: Split Data into Training and Testing Sets
+# 80% for training and 20% for testing.
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Step 4: Train Logistic Regression Model
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Step 5: Make Predictions
+pred = model.predict(X_test)
+
+print("Predictions:", pred)
+print("Accuracy:", accuracy_score(y_test, pred))
+
+# Step 6: Predict for a New Input Value
+# Change 5 to the value you want to predict for.
+# Use the SAME input column name as in X.
+new_data = pd.DataFrame({
+    "column1": [5]
+})
+
+print(
+    "Prediction for new input:",
+    model.predict(new_data)
+)
