@@ -1,0 +1,93 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# Step 1: Load dataset
+# Change only the file path according to your dataset
+data = pd.read_csv("/content/drive/MyDrive/dataset.csv")
+
+# Display column names to understand the dataset
+print(data.head())
+print("Columns:", data.columns.tolist())
+print("Dataset Shape:", data.shape)
+
+# Step 2: Remove missing values
+# Replace column1, column2, column3 with actual column names.
+# Select columns required for sampling and train/test split.
+data = data.dropna(subset=["column1", "column2", "column3"])
+
+# Step 3: Simple Random Sampling (SRS)
+# Select random rows from the complete dataset.
+# Change 20 if the question specifies a different sample size.
+srs_sample = data.sample(n=min(20, len(data)), random_state=42)
+
+print("\n--- Simple Random Sampling ---")
+print("Shape:", srs_sample.shape)
+print(srs_sample.head(3))
+
+# Step 4: Stratified Sampling
+# Replace column1 with a CATEGORICAL column.
+# Examples: gender, education level, department, class.
+# The column should contain groups/categories, not continuous measurements.
+stratified_sample = data.groupby(
+    "column1", group_keys=False
+).apply(
+    lambda x: x.sample(frac=0.2, random_state=42)
+)
+
+print("\n--- Stratified Sampling ---")
+print("Shape:", stratified_sample.shape)
+print(stratified_sample["column1"].value_counts())
+
+# Step 5: Cluster Sampling
+# Replace column1 with a column representing meaningful groups/clusters.
+# Examples: school ID, class ID, department, or village.
+# Randomly select up to 2 clusters and include ALL rows in those clusters.
+clusters = data["column1"].dropna().unique()
+
+selected_clusters = np.random.choice(
+    clusters, size=min(2, len(clusters)), replace=False
+)
+
+cluster_sample = data[data["column1"].isin(selected_clusters)]
+
+print("\n--- Cluster Sampling ---")
+print("Selected Clusters:", selected_clusters)
+print("Shape:", cluster_sample.shape)
+print(cluster_sample["column1"].value_counts())
+
+# Step 6: Train/Test Split
+# Replace column2 with a NUMERIC input/feature column.
+# Replace column3 with a NUMERIC target/output column.
+# Example: hours studied -> marks, experience -> salary.
+X = data[["column2"]]
+y = data["column3"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+print("\n--- Train/Test Partitioning ---")
+print("Train Shape:", X_train.shape)
+print("Test Shape:", X_test.shape)
+
+# Step 7: Visualize training and testing data
+# Use the SAME numeric column names selected in Step 6.
+plt.figure(figsize=(7, 4))
+
+plt.scatter(
+    X_train["column2"], y_train,
+    color="blue", label="Train Data", alpha=0.6
+)
+
+plt.scatter(
+    X_test["column2"], y_test,
+    color="red", label="Test Data", alpha=0.6
+)
+
+plt.xlabel("column2")
+plt.ylabel("column3")
+plt.title("Train vs Test Split")
+plt.legend()
+plt.show()
