@@ -1,0 +1,90 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from google.colab import files
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
+
+# Step 1: Upload and load the dataset
+uploaded = files.upload()
+df = pd.read_csv(list(uploaded.keys())[0])
+
+print("Original Dataset:")
+print(df.head())
+
+# Step 2: Detect and remove missing values
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+df = df.dropna()
+
+print("\nMissing values after removal:")
+print(df.isnull().sum())
+
+# Step 3: Detect and remove duplicate values
+print("\nDuplicate Rows:", df.duplicated().sum())
+df = df.drop_duplicates()
+print("Duplicates after removal:", df.duplicated().sum())
+
+# Step 4: Apply Label Encoding
+cat_cols = df.select_dtypes(include=['object', 'category']).columns
+
+for col in cat_cols:
+    le = LabelEncoder()
+    df[col + '_Label'] = le.fit_transform(df[col].astype(str))
+
+# Step 5: Apply One-Hot Encoding
+df = pd.get_dummies(df, columns=cat_cols, dtype=int)
+
+print("\nEncoded Dataset:")
+print(df.head())
+
+# Step 6: Apply Min-Max Scaling
+num_cols = df.select_dtypes(include='number').columns
+
+df_minmax = df.copy()
+scaler1 = MinMaxScaler()
+df_minmax[num_cols] = scaler1.fit_transform(df[num_cols])
+
+print("\nMin-Max Scaled Dataset:")
+print(df_minmax.head())
+
+# Step 7: Apply Standard Scaling
+df_standard = df.copy()
+scaler2 = StandardScaler()
+df_standard[num_cols] = scaler2.fit_transform(df[num_cols])
+
+print("\nStandard Scaled Dataset:")
+print(df_standard.head())
+
+# Step 8: Detect outliers using a box plot
+df[num_cols].plot(
+    kind='box',
+    subplots=True,
+    layout=(2, 4),
+    figsize=(14, 8),
+    sharex=False,
+    sharey=False
+)
+plt.tight_layout()
+plt.show()
+
+# Step 9: Detect outliers using the IQR method
+Q1 = df[num_cols].quantile(0.25)
+Q3 = df[num_cols].quantile(0.75)
+IQR = Q3 - Q1
+
+outliers = (
+    (df[num_cols] < (Q1 - 1.5 * IQR)) |
+    (df[num_cols] > (Q3 + 1.5 * IQR))
+)
+
+print("\nOutliers in each column:")
+print(outliers.sum())
+
+# Step 10: Remove rows containing outliers
+df_clean = df[~outliers.any(axis=1)].copy()
+
+print("\nDataset after removing outliers:")
+print(df_clean.head())
+print("Final dataset shape:", df_clean.shape)
