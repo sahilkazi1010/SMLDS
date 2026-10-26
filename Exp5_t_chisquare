@@ -1,0 +1,47 @@
+import pandas as pd
+from scipy.stats import ttest_1samp, chi2_contingency
+
+# Step 1: Load the dataset
+# Change the file path according to your dataset
+data = pd.read_csv("/content/Salary_Data.csv")
+
+print(data.head())
+
+# Step 2: One-Sample t-Test
+# Replace column1 with a NUMERIC column
+# Replace 50000 with the hypothesized population mean given in the question
+sample = data["column1"].dropna()
+
+t, p = ttest_1samp(sample, popmean=50000)
+
+print("\n--- One-Sample t-Test ---")
+print("T-statistic:", t)
+print("P-value:", p)
+
+# Step 3: Hypothesis Decision for t-Test
+# Significance level is 0.05
+if p < 0.05:
+    print("Reject Null Hypothesis")
+else:
+    print("Fail to Reject Null Hypothesis")
+
+# Step 4: Chi-Square Test of Independence
+# Replace column2 and column3 with TWO CATEGORICAL columns
+# Examples: Gender and Job Title, Department and Grade Category
+table = pd.crosstab(data["column2"], data["column3"])
+
+print("\n--- Contingency Table ---")
+print(table)
+
+# Step 5: Perform Chi-Square Test
+chi, p, dof, expected = chi2_contingency(table)
+
+print("Chi-square value:", chi)
+print("P-value:", p)
+print("Degrees of Freedom:", dof)
+
+# Step 6: Hypothesis Decision for Chi-Square Test
+if p < 0.05:
+    print("Reject Null Hypothesis")
+else:
+    print("Fail to Reject Null Hypothesis")
